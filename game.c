@@ -354,9 +354,6 @@ int main(void)
 		
 		handleIO();
 		
-		if (first) {
-			drawBackground();
-		}
 		
 		if (!first) {
 			// Delete previous screen
@@ -540,7 +537,7 @@ void drawScreen () {
 	drawCar();
 	
 	//draw the skyline
-	//drawBackground();
+	drawBackground();
 	
 	//draw time and laps
 	drawTime(elapsedTime, trackIdx);
