@@ -294,6 +294,7 @@ float trackCurvature = 0;
 float driverCurvature = 0;
 float carPosDelta = 0;
 int carPos = 0;
+float curRoadWidth = 0;
 
 int leftEdge = 0, rightEdge = 0;
 
@@ -533,6 +534,9 @@ void drawScreen () {
 
 		float midPoint = 0.5 + curvature * (1 - perspective) * (1 - perspective) * (1 - perspective);
 		float roadWidth = 0.8 * perspective + 0.1;
+		
+		curRoadWidth = roadWidth;
+		
 		float clipWidth = roadWidth * 0.15;
 
 		roadWidth *= 0.5;
@@ -583,7 +587,8 @@ void drawScreen () {
 
 void drawCar() {
 	
-	carPosDelta = (driverCurvature - trackCurvature) * 0.5 * RES_X * speed / MAX_SPEED;
+	if (speed > 0)
+		carPosDelta = (driverCurvature - trackCurvature) * 0.5 * RES_X;
 	
 	//printf("%f\n", carPosDelta);
 	
@@ -714,12 +719,29 @@ void drawSigns(int base_x, int base_y, int direction[]){
 	// Center the sign
 	base_x -= 10;
 	base_y -= 10;
-	for (int y = 0; y < 20; y++) {
-		for (int x = 0; x < 20; x++) {
-			int loc = ((20 * y) + x);
+		
+	float size = 20 * curRoadWidth * 2;
+	if (size > 20) size = 20;
+	float scaleFactor = size / 20;	
+	
+	
+	if (scaleFactor == 0) return;
+	
+	
+	for (int y = 0; y < size; y++) {
+		for (int x = 0; x < size; x++) {
+					
+			int loc = ((20 * (int) (y / scaleFactor)) + (int)(x / scaleFactor));
 			int color = direction[loc];
 			if (color == 0) continue;
-			draw_pixel(base_x + x, base_y + y, color);
+			
+			int loc_x = base_x + x;
+			int loc_y = base_y + y;
+			
+			// Check if in bounds
+			if (loc_x < 0 || loc_x >= RES_X || loc_y >= RES_Y) continue;
+			
+			draw_pixel(loc_x, loc_y, color);
 		}
 	} 
 }
