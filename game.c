@@ -307,6 +307,7 @@ int clipMapping[120][120] = {{1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
 int mappingRow = 0;
 short int frame[RES_Y][RES_X] = {0};
 short int prevFrame[RES_Y][RES_X] = {0};
+short int prevFramePrev[RES_Y][RES_X] = {0};
 
 #define TRACK_SIZE 12
 float track[TRACK_SIZE][4] = { // curvature, distance, curve speed
@@ -327,6 +328,9 @@ float track_len = 0;
 
 float curTrackTime = 0; // Used to change the rate of change of a track
 int prevTrackIdx = 0; // Used to check if there was a change in track
+
+int loopCount = 0;
+bool bufferFlip = true;
 	
 int main(void)
 {
@@ -374,10 +378,18 @@ int main(void)
 			*/
 			
 			// Copy previous frame
-			for (int y = 0; y < RES_Y; y++) {
-				for (int x = 0; x < RES_X; x++) {
-					prevFrame[y][x] = frame[y][x];
-				}	
+			if (bufferFlip) {
+				for (int y = 0; y < RES_Y; y++) {
+					for (int x = 0; x < RES_X; x++) {
+						prevFrame[y][x] = frame[y][x];
+					}	
+				}
+			} else {
+				for (int y = 0; y < RES_Y; y++) {
+					for (int x = 0; x < RES_X; x++) {
+						prevFramePrev[y][x] = frame[y][x];
+					}	
+				}
 			}
 						
 		}
@@ -396,6 +408,8 @@ int main(void)
         
     
 		first = false;
+		loopCount++;
+		bufferFlip = !bufferFlip;
 	}
 }
 
@@ -608,7 +622,7 @@ void drawCar() {
 	
 	carPos = base_x;
 	
-	if ((key0 & 0b01000) && (key0 & 0b01)) {
+	if ((key0 & 0b01000) && (speed != 0)) {
 		printf("HERE\n");
 		for (int y = 0; y < 2 * 32; y++) {
 			for (int x = 0; x < 2 * 52; x++) {
@@ -620,7 +634,7 @@ void drawCar() {
 				draw_pixel(base_x + x, base_y + y, color);
 			}
 		}
-	} else if ((key0 & 0b00100) && (key0 & 0b01)) {
+	} else if ((key0 & 0b00100) && (speed != 0)) {
 		for (int y = 0; y < 2 * 32; y++) {
 			for (int x = 0; x < 2 * 52; x++) {
 				int x_ = (x / 2);
@@ -891,9 +905,22 @@ void flush_frame() {
 		for (int x = 0; x < RES_X; x++) {
 			
 			// Only draw if new
-			//if (prevFrame [y][x] != frame[y][x]) {
+			if (loopCount > 0) {
+				if (!bufferFlip) {
+					if (prevFrame [y][x] != frame[y][x]) {
+						plot_pixel(x, y, frame[y][x]);
+					}
+				} else {
+					if (prevFramePrev [y][x] != frame[y][x]) {
+						plot_pixel(x, y, frame[y][x]);
+					}
+					
+				}
+				
+			}
+			else {
 				plot_pixel(x, y, frame[y][x]);
-			//}	
+			}	
 		}		
 	}	
 }
