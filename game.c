@@ -64,7 +64,7 @@ void handleIO();
 void drawScreen();
 void drawCar();
 void drawBackground();
-void drawTime(float elapsedTime, int trackIdx);
+void drawTime(float elapsedTime, int laps);
 
 void drawSigns(int base_x, int base_y, int direction[]);
 void setup();	
@@ -186,7 +186,7 @@ int numbers[12][25] = {
 }};
 
 // Define the color code for each letter
-int letters[8][25] = {
+int letters[14][25] = {
  // t
 {
     1, 1, 1, 1, 1,
@@ -211,7 +211,7 @@ int letters[8][25] = {
     1, 0, 0, 0, 1,
     1, 0, 0, 0, 1
 },
-// m
+// e
 {
     1, 1, 1, 1, 1,
     1, 0, 0, 0, 0,
@@ -250,6 +250,60 @@ int letters[8][25] = {
     1, 1, 1, 1, 1,
     0, 0, 0, 0, 1,
     1, 1, 1, 1, 1
+},
+
+//f
+{
+    1, 1, 1, 1, 1,
+    1, 0, 0, 0, 0,
+    1, 1, 1, 1, 0,
+    1, 0, 0, 0, 0,
+    1, 0, 0, 0, 0
+},
+
+// i
+{
+    1, 1, 1, 1, 1,
+    0, 0, 1, 0, 0,
+    0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0,
+    1, 1, 1, 1, 1
+},
+
+//n
+{
+    1, 0, 0, 0, 1,
+    1, 1, 0, 0, 0,
+    1, 0, 1, 0, 1,
+    1, 0, 0, 1, 1,
+    1, 1, 0, 0, 1
+},
+	
+// i
+{
+    1, 1, 1, 1, 1,
+    0, 0, 1, 0, 0,
+    0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0,
+    1, 1, 1, 1, 1
+},
+
+	//s
+{
+    1, 1, 1, 1, 1,
+    1, 0, 0, 0, 0,
+    1, 1, 1, 1, 1,
+    0, 0, 0, 0, 1,
+    1, 1, 1, 1, 1
+},
+
+//h
+{
+    1, 0, 0, 0, 1,
+    1, 0, 0, 0, 1,
+    1, 1, 1, 1, 1,
+    1, 0, 0, 0, 1,
+    1, 0, 0, 0, 1
 }};
 
 
@@ -297,6 +351,9 @@ float driverCurvature = 0;
 float carPosDelta = 0;
 int carPos = 0;
 float curRoadWidth = 0;
+int previous_value = RES_Y/2;
+int laps = 1;
+int reset = 0;
 
 int leftEdge = 0, rightEdge = 0;
 
@@ -309,6 +366,7 @@ short int frame[RES_Y][RES_X] = {0};
 short int prevFrame[RES_Y][RES_X] = {0};
 short int prevFramePrev[RES_Y][RES_X] = {0};
 
+#define LAP_SIZE 3
 #define TRACK_SIZE 12
 float track[TRACK_SIZE][4] = { // curvature, distance, curve speed
 	{0, 100, 0.01},
@@ -359,6 +417,33 @@ int main(void)
     {
 		pixel_buffer_start = *(pixel_ctrl_ptr + 1); // new back buffer
         /* Erase any boxes and lines that were drawn in the last iteration */
+ 
+ 
+		if (reset){
+			volatile int* key_ptr = KEY_BASE;
+			volatile int key = *key_ptr;
+		
+			// reset game
+	
+			if (key & 0b001){
+				elapsedTime = 0;
+				distance = 0;
+				speed = 0;
+				curvature = 0;
+				trackCurvature = 0;
+				driverCurvature = 0;
+				carPosDelta = 0;
+				carPos = 0;
+				curRoadWidth = 0;
+				previous_value = RES_Y/2;
+				laps = 1;
+				reset = 0;
+				leftEdge = 0, rightEdge = 0;
+			}
+			else{
+				continue;
+			}
+		}
  
 		if(0 /*normal*/) elapsedTime = 10;
 		if(1 /*fast*/) elapsedTime += 0.01;
@@ -416,23 +501,40 @@ int main(void)
 void handleIO() {
 	
 	volatile int* key_ptr = KEY_BASE;
-	volatile int key0 = *key_ptr;
+	volatile int key = *key_ptr;
 		
+	// reset game
+	if (key & 0b001){
+		elapsedTime = 0;
+		distance = 0;
+		speed = 0;
+		curvature = 0;
+		trackCurvature = 0;
+		driverCurvature = 0;
+		carPosDelta = 0;
+		carPos = 0;
+		curRoadWidth = 0;
+		previous_value = RES_Y/2;
+		laps = 1;
+		reset = 0;
+		leftEdge = 0, rightEdge = 0;
+	}
+	
 	// Moving forward
-	if (key0 & 0b01) {
+	if (key & 0b010) {
 		speed += 5;
-	} else if (!(key0 & 0b01)) { // Stopping
+	} else if (!(key & 0b01)) { // Stopping
 		speed -= 1;
 	}
 	
 	// Turning left only when moving forward
-	if (key0 & 0b01000) {
+	if (key & 0b01000) {
 		if(speed != 0) { // only if moving forward
 			driverCurvature -= 0.05;
 		}
 	} 
 	// Turning right only when moving forward
-	else if (key0 & 0b00100) {
+	else if (key & 0b00100) {
 		if (speed != 0) { // only if moving forward
 			driverCurvature += 0.05;
 		}
@@ -542,6 +644,34 @@ void drawScreen () {
 		
 	}
 	
+	// draw finish line
+	if((trackIdx >= (TRACK_SIZE - 2))){
+		if(previous_value > RES_Y) previous_value = (RES_Y/2);
+		int current_value = previous_value;
+		for (int y = current_value; y < current_value + 3; y++) {
+			for (int x = 0; x < RES_X; x++) {
+				float perspective = (float)(y - (RES_Y / 2.0)) / (RES_Y / 2.0);
+				float midPoint = 0.5 + curvature * (1 - perspective) * (1 - perspective) * (1 - perspective);
+				float roadWidth = 0.8 * perspective + 0.1;
+				roadWidth *= 0.5;
+				
+				// Road borders
+				float roadShift = -0.5 * carPosDelta;
+				int leftClip = (midPoint - roadWidth) * RES_X + roadShift;
+				int rightClip = (midPoint + roadWidth) * RES_X + roadShift;
+				
+				int color = (laps == LAP_SIZE) ? BLACK : WHITE;
+
+				if (x >= leftClip && x < rightClip) {
+					draw_pixel(x, y, color);
+				}
+			}
+		}
+		
+		previous_value+=5;
+	}
+	
+	
 	// draw signs
 	if(previous_y >= RES_Y - 20) previous_y = (RES_Y/2);
 	for (int x = 0; x < RES_X; x++) {
@@ -586,7 +716,7 @@ void drawScreen () {
 	drawBackground();
 	
 	//draw time and laps
-	drawTime(elapsedTime, trackIdx);
+	drawTime(elapsedTime, laps);
 	
 	// Update the current Track time
 	curTrackTime += track[trackIdx][2] * speed / MAX_SPEED;
@@ -596,6 +726,57 @@ void drawScreen () {
 	if (trackIdx + 1 >= TRACK_SIZE) { // At the end of track
 		distance = 0;
 		curTrackTime = 0;
+		laps++;
+		if(laps == LAP_SIZE + 1){
+			int base_y = 0.25 * (RES_Y/2);
+			int base_x = RES_Y/2;
+			
+			for(int i = base_x - 10 ; i< base_x + 75; i++){
+				for(int j = base_y - 10; j < base_y + 30; j++){
+					draw_pixel(i, j , WHITE);
+				}
+			}
+
+			for (int i = 8; i < 14; i++){
+				for (int j = 0; j < 25; j++){
+					int x = j/5;
+					int y = (j - 5*x);
+					if(letters[i][j] == 1){
+						draw_pixel(base_x + y, base_y + x, BLACK);
+					}
+				}
+
+				base_x += 10;
+			}
+			
+			char timeStr[10];
+			sprintf(timeStr, "%.2f", elapsedTime);
+			base_y += 10;
+			base_x = RES_Y/2 + 5;
+			int indexNumber;
+	
+			for(int i = 0; i < strlen(timeStr); i++){
+			if (timeStr[i] == '.'){
+				indexNumber = 10;
+			}
+
+			else{
+				indexNumber = timeStr[i] - '0';
+			}
+
+			for (int j = 0; j < 25; j++){
+				int x = j/5;
+				int y = (j - 5*x);
+				if(numbers[indexNumber][j] == 1){
+					draw_pixel(base_x + y, base_y + x, BLACK);
+				}
+			}
+
+			base_x += 10;
+		}
+			reset = 1;
+			laps = 1;
+		}
 	}
 	
 	
@@ -623,7 +804,6 @@ void drawCar() {
 	carPos = base_x;
 	
 	if ((key0 & 0b01000) && (speed != 0)) {
-		printf("HERE\n");
 		for (int y = 0; y < 2 * 32; y++) {
 			for (int x = 0; x < 2 * 52; x++) {
 				int x_ = (x / 2);
@@ -684,7 +864,7 @@ void drawBackground() {
 }
 
 
-void drawTime(float elapsedTime, int trackIdx){
+void drawTime(float elapsedTime, int laps){
 	char timeStr[10];
 	sprintf(timeStr, "%.2f", elapsedTime);
 	int base_y = 10;
@@ -745,7 +925,7 @@ void drawTime(float elapsedTime, int trackIdx){
 	// display laps
 	base_x = RES_X - 50;
 	base_y += 10;
-	int ids[3] = {trackIdx, 11, TRACK_SIZE};
+	int ids[3] = {laps, 11, LAP_SIZE};
 	
 	for(int i = 0; i < 3; i++){	
 		for (int j = 0; j < 25; j++){
@@ -1233,7 +1413,7 @@ int tempRightSign[] = {0xd0, 0x00, 0xd0, 0x00, 0xd0, 0x00, 0xd0, 0x00, 0xd0, 0x0
 		rightSign[count] = (tempRightSign[count*2] << 8) + tempRightSign[count*2 + 1];
 	}
 	
-	printf(" this %d\n", sizeof(tempBackground) / sizeof(int));
+	//printf(" this %d\n", sizeof(tempBackground) / sizeof(int));
 	
 	
 	// Calculate current track length;
