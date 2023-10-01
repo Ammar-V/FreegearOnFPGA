@@ -35,6 +35,6 @@ time. Remember to use the controls carefully and avoid crashing to complete the 
 successfully.
 
 ## Demo
-[<img src="https://github.com/Ammar-V/FreegearOnFPGA/blob/c208c1432ef4ab967bb1cc42c52640e290198145/freegear.png" width="25%">](https://user-images.githubusercontent.com/81657185/271836029-3943e5d9-2fbb-4b11-8e53-4c067f80839f.mp4 "Freegear Toronto on FPGA")
+[<img src="https://github.com/Ammar-V/FreegearOnFPGA/blob/main/freegear.png?raw=true" width="25%">](https://user-images.githubusercontent.com/81657185/271836029-3943e5d9-2fbb-4b11-8e53-4c067f80839f.mp4 "Freegear Toronto on FPGA")
 
 
