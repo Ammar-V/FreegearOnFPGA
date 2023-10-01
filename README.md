@@ -35,4 +35,4 @@ time. Remember to use the controls carefully and avoid crashing to complete the 
 successfully.
 
 ## Demo
-[<img src="https://github.com/Ammar-V/FreegearOnFPGA/blob/main/freegear.png?raw=true" width="50%">]([https://youtube.com/shorts/vmYdRygjpts](https://drive.google.com/file/d/1tvpSRiYY5S3ZSw0ZNIaKejuRlN67gylY/view?usp=sharing)https://drive.google.com/file/d/1tvpSRiYY5S3ZSw0ZNIaKejuRlN67gylY/view?usp=sharing "Freegear Toronto on FPGA")
+[<img src="https://github.com/Ammar-V/FreegearOnFPGA/blob/main/freegear.png?raw=true" width="50%">](https://www.youtube.com/shorts/vmYdRygjpts "Freegear Toronto on FPGA")
