@@ -35,6 +35,6 @@ time. Remember to use the controls carefully and avoid crashing to complete the 
 successfully.
 
 ## Demo
-<video src="https://github-production-user-asset-6210df.s3.amazonaws.com/81657185/271836029-3943e5d9-2fbb-4b11-8e53-4c067f80839f.mp4"></video>
+<video height="25%" src="https://user-images.githubusercontent.com/81657185/271836029-3943e5d9-2fbb-4b11-8e53-4c067f80839f.mp4"></video>
 
 
